@@ -124,11 +124,46 @@
     if (best && bestScore > 0 && (best.always || RELEVANT.test(m))) return best.a;
     return FALLBACK;
   }
+  // Plain-text version of an HTML reply, for the model's conversation history.
+  function htmlToText(s) { return String(s).replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim(); }
+  // The LLM returns plain text; escape it and keep line breaks.
+  function formatReply(s) { return escapeHtml(s).replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>"); }
+
+  var history = [];           // {role:"user"|"assistant", content} sent to /api/chat
+  var llmDown = false;        // once the endpoint reports "needs setup", stop calling it this session
+  var minDelay = 480;         // keep the typing indicator visible briefly even on fast replies
+
   function sendUser(text) {
     addMsg("user", escapeHtml(text));
     input.value = "";
+    history.push({ role: "user", content: text });
+    if (history.length > 12) history = history.slice(-12);
     var t = typing();
-    setTimeout(function () { t.remove(); botSay(answer(text)); }, 550 + Math.random() * 450);
+
+    // Local scripted answer used when the AI service is unavailable.
+    var fallback = function () {
+      var fb = answer(text);
+      history.push({ role: "assistant", content: htmlToText(fb) });
+      t.remove(); botSay(fb);
+    };
+
+    if (llmDown) { setTimeout(fallback, minDelay + Math.random() * 300); return; }
+
+    fetch("/api/chat", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: history })
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (data && data.reply) {
+          history.push({ role: "assistant", content: data.reply });
+          t.remove(); botSay(formatReply(data.reply));
+        } else {
+          if (data && data.needsSetup) llmDown = true; // no key configured yet — use scripts
+          fallback();
+        }
+      })
+      .catch(function () { fallback(); });
   }
   inputForm.addEventListener("submit", function (e) {
     e.preventDefault();
