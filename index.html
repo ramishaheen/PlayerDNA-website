@@ -11,6 +11,26 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <!-- ===== SEO / AEO (added) ===== -->
+  <link rel="canonical" href="https://www.playerdna.tech/" />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <meta name="author" content="PlayerDNA Labs" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="PlayerDNA Labs" />
+  <meta property="og:url" content="https://www.playerdna.tech/" />
+  <meta property="og:title" content="PlayerDNA Labs — The First AI Sports Academy &amp; Football Position Intelligence" />
+  <meta property="og:description" content="PlayerDNA Labs is the first AI sports academy. Turn a single video into a complete athlete profile across 16 dimensions and the football positions a player is built for." />
+  <meta property="og:image" content="https://www.playerdna.tech/assets/img/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="PlayerDNA Labs — the first AI sports academy" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PlayerDNA Labs — The First AI Sports Academy &amp; Football Position Intelligence" />
+  <meta name="twitter:description" content="PlayerDNA Labs is the first AI sports academy. Turn a single video into a complete athlete profile across 16 dimensions and the football positions a player is built for." />
+  <meta name="twitter:image" content="https://www.playerdna.tech/assets/img/og-image.png" />
+  <meta name="keywords" content="AI sports academy, first AI sports academy, AI football position analysis, AI athlete intelligence, AI player development, AI sport, AI scouting, athlete profiling AI, biomechanics AI, injury risk AI, PlayerDNA" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Organization","EducationalOrganization","SportsOrganization"],"@id":"https://www.playerdna.tech/#organization","name":"PlayerDNA Labs","alternateName":"PlayerDNA","url":"https://www.playerdna.tech/","logo":{"@type":"ImageObject","url":"https://www.playerdna.tech/assets/img/logo-full.png"},"image":"https://www.playerdna.tech/assets/img/og-image.png","description":"PlayerDNA Labs is the first AI sports academy. It turns a single video into a complete athlete profile and identifies the football positions a player is built for.","slogan":"AI that decodes every athlete.","knowsAbout":["AI sports academy","AI football position analysis","AI athlete intelligence","AI player development","sports biomechanics","injury risk analysis","talent identification"]},{"@type":"WebSite","@id":"https://www.playerdna.tech/#website","url":"https://www.playerdna.tech/","name":"PlayerDNA Labs","description":"The first AI sports academy — complete athlete profiles and AI football position intelligence from a single video.","publisher":{"@id":"https://www.playerdna.tech/#organization"},"inLanguage":"en"},{"@type":"Service","@id":"https://www.playerdna.tech/#service","name":"AI Athlete Profiling & Football Position Analysis","serviceType":"AI sports performance analysis","provider":{"@id":"https://www.playerdna.tech/#organization"},"description":"Upload one training or match video to receive a complete 16-dimension athlete profile — speed, power, stamina, agility, biomechanics and injury risk — plus the football positions the player is built for.","areaServed":"Worldwide","audience":{"@type":"Audience","audienceType":"Footballers, coaches, academies and scouts"}},{"@type":"FAQPage","@id":"https://www.playerdna.tech/#faq","mainEntity":[{"@type":"Question","name":"What is PlayerDNA Labs?","acceptedAnswer":{"@type":"Answer","text":"PlayerDNA Labs is the first AI sports academy. It turns a single training or match video into a complete athlete profile, measuring speed, power, stamina, agility, biomechanics and injury risk across 16 dimensions, then identifies the football positions a player is naturally built for."}},{"@type":"Question","name":"How does AI football position analysis work?","acceptedAnswer":{"@type":"Answer","text":"PlayerDNA's AI tracks an athlete's movement, sprint mechanics and body metrics from ordinary video, scores them against validated sports-science standards, and maps the results to the physical demands of each football position — producing a data-backed recommendation of the roles where a player is most likely to excel."}},{"@type":"Question","name":"What do I need to get an athlete profile?","acceptedAnswer":{"@type":"Answer","text":"You only need one training or match video. PlayerDNA Labs analyses the footage and returns a full 16-dimension report covering speed and power, agility and endurance, strength and movement, readiness, and body and mind — with no wearables or lab equipment required."}},{"@type":"Question","name":"Who is PlayerDNA Labs for?","acceptedAnswer":{"@type":"Answer","text":"PlayerDNA Labs is built for players who want to understand their potential, coaches and academies running talent identification, and scouts who need objective, comparable athlete data. It supports AI player development, recruitment and injury-risk awareness."}},{"@type":"Question","name":"Why is PlayerDNA called the first AI sports academy?","acceptedAnswer":{"@type":"Answer","text":"PlayerDNA Labs combines automated, video-based athlete assessment with player development and certification in a single AI platform, rather than offering analytics or coaching in isolation — which is why it positions itself as the first AI sports academy."}},{"@type":"Question","name":"How accurate are PlayerDNA's measurements?","acceptedAnswer":{"@type":"Answer","text":"Every PlayerDNA score maps to a validated testing protocol — EUROFIT sprint norms, Illinois Agility, CMJ vertical-jump norms, Yo-Yo/MSFT VO2max and ACSM strength tables — so results are calibrated to real standards and comparable between athletes."}}]}]}</script>
 </head>
 <body>
   <canvas class="neural-net" id="neuralNet" aria-hidden="true"></canvas>
@@ -317,7 +337,7 @@
           <!-- 0 · COVER -->
           <div class="bk-tpl"><div class="fb-cover-bg"><div class="fb-cover-inner">
             <img src="assets/img/logo-full.png" alt="PLAYER DNA" class="fb-pg-logo" />
-            <h1>THE ATHLETE PLAYBOOK</h1>
+            <div class="fb-cover-h1">THE ATHLETE PLAYBOOK</div>
             <p class="fb-cover-tag">Discover the position you were built for.</p>
             <span class="fb-cover-foot">AI Solutions for Athletes</span>
           </div></div></div>
@@ -1606,6 +1626,55 @@
   </main>
 
   <!-- ===== FOOTER ===== -->
+  <!-- ===== FAQ (added for AEO) ===== -->
+  <style>
+    .pdna-faq{max-width:820px;margin:0 auto;padding:80px 24px}
+    .pdna-faq h2{font-family:var(--font-display,inherit);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;color:#fff;text-align:center;margin:0 0 10px;letter-spacing:.01em}
+    .pdna-faq .pdna-faq-sub{text-align:center;color:#9fb0c3;margin:0 0 36px;font-size:1rem}
+    .pdna-faq-list{border:1px solid rgba(255,255,255,.10);border-radius:18px;background:rgba(255,255,255,.04);overflow:hidden}
+    .pdna-faq-item{border-top:1px solid rgba(255,255,255,.08)}
+    .pdna-faq-item:first-child{border-top:0}
+    .pdna-faq-item>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;font-size:1.08rem;font-weight:600;color:#fff}
+    .pdna-faq-item>summary::-webkit-details-marker{display:none}
+    .pdna-faq-ic{flex:none;width:20px;height:20px;position:relative;transition:transform .2s ease}
+    .pdna-faq-ic::before,.pdna-faq-ic::after{content:"";position:absolute;background:#22d3ee;border-radius:2px}
+    .pdna-faq-ic::before{left:9px;top:2px;width:2px;height:16px}
+    .pdna-faq-ic::after{left:2px;top:9px;width:16px;height:2px}
+    .pdna-faq-item[open] .pdna-faq-ic{transform:rotate(45deg)}
+    .pdna-faq-item>p{margin:0;padding:0 24px 22px;color:#c3d0de;line-height:1.7;font-size:1rem}
+    [dir="rtl"] .pdna-faq-item>summary{flex-direction:row-reverse}
+  </style>
+  <section class="pdna-faq" id="faq" aria-labelledby="pdna-faq-h">
+    <h2 id="pdna-faq-h">Frequently asked questions</h2>
+    <p class="pdna-faq-sub">How the first AI sports academy works, and how AI football position analysis turns one video into a full athlete profile.</p>
+    <div class="pdna-faq-list">
+      <details class="pdna-faq-item" open>
+        <summary>What is PlayerDNA Labs?<span class="pdna-faq-ic" aria-hidden="true"></span></summary>
+        <p>PlayerDNA Labs is the first AI sports academy. It turns a single training or match video into a complete athlete profile, measuring speed, power, stamina, agility, biomechanics and injury risk across 16 dimensions, then identifies the football positions a player is naturally built for.</p>
+      </details>
+      <details class="pdna-faq-item">
+        <summary>How does AI football position analysis work?<span class="pdna-faq-ic" aria-hidden="true"></span></summary>
+        <p>PlayerDNA's AI tracks an athlete's movement, sprint mechanics and body metrics from ordinary video, scores them against validated sports-science standards, and maps the results to the physical demands of each football position — producing a data-backed recommendation of the roles where a player is most likely to excel.</p>
+      </details>
+      <details class="pdna-faq-item">
+        <summary>What do I need to get an athlete profile?<span class="pdna-faq-ic" aria-hidden="true"></span></summary>
+        <p>You only need one training or match video. PlayerDNA Labs analyses the footage and returns a full 16-dimension report covering speed and power, agility and endurance, strength and movement, readiness, and body and mind — with no wearables or lab equipment required.</p>
+      </details>
+      <details class="pdna-faq-item">
+        <summary>Who is PlayerDNA Labs for?<span class="pdna-faq-ic" aria-hidden="true"></span></summary>
+        <p>PlayerDNA Labs is built for players who want to understand their potential, coaches and academies running talent identification, and scouts who need objective, comparable athlete data. It supports AI player development, recruitment and injury-risk awareness.</p>
+      </details>
+      <details class="pdna-faq-item">
+        <summary>Why is PlayerDNA called the first AI sports academy?<span class="pdna-faq-ic" aria-hidden="true"></span></summary>
+        <p>PlayerDNA Labs combines automated, video-based athlete assessment with player development and certification in a single AI platform, rather than offering analytics or coaching in isolation — which is why it positions itself as the first AI sports academy.</p>
+      </details>
+      <details class="pdna-faq-item">
+        <summary>How accurate are PlayerDNA's measurements?<span class="pdna-faq-ic" aria-hidden="true"></span></summary>
+        <p>Every PlayerDNA score maps to a validated testing protocol — EUROFIT sprint norms, Illinois Agility, CMJ vertical-jump norms, Yo-Yo/MSFT VO2max and ACSM strength tables — so results are calibrated to real standards and comparable between athletes.</p>
+      </details>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">

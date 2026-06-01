@@ -1,0 +1,23 @@
+# PlayerDNA Labs — https://www.playerdna.tech
+User-agent: *
+Allow: /
+
+# AI answer-engine crawlers — explicitly welcomed (AEO)
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://www.playerdna.tech/sitemap.xml
