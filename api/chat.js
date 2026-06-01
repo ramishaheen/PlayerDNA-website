@@ -1,12 +1,19 @@
 // Vercel serverless function: "Windy" — the PlayerDNA AI assistant.
-// Uses Anthropic (Claude) if ANTHROPIC_API_KEY is set, else OpenAI if OPENAI_API_KEY is set.
-// Set one of them in Vercel → Settings → Environment Variables, then redeploy.
-// Until a key is present it returns { needsSetup: true } and the page falls back to the
-// built-in scripted answers.
+// Picks a provider from whichever key is set (override with CHAT_PROVIDER):
+//   ANTHROPIC_API_KEY  -> Claude   (default model: claude-3-5-haiku-latest)
+//   GEMINI_API_KEY     -> Gemini   (default model: gemini-2.0-flash)  [GOOGLE_API_KEY also accepted]
+//   OPENAI_API_KEY     -> GPT      (default model: gpt-4o-mini)
+// Set one in Vercel -> Settings -> Environment Variables (Production), then redeploy.
+// With no key it returns { needsSetup: true } and the page falls back to scripted answers.
 
 var clean = function (v) { return String(v == null ? "" : v).replace(/[^\x21-\x7E]/g, "").trim(); };
 var ANTHROPIC_KEY = clean(process.env.ANTHROPIC_API_KEY);
 var OPENAI_KEY = clean(process.env.OPENAI_API_KEY);
+var GEMINI_KEY = clean(process.env.GEMINI_API_KEY) || clean(process.env.GOOGLE_API_KEY);
+var PROVIDER = clean(process.env.CHAT_PROVIDER).toLowerCase(); // optional: "anthropic" | "gemini" | "openai"
+var ANTHROPIC_MODEL = clean(process.env.ANTHROPIC_MODEL) || "claude-3-5-haiku-latest";
+var GEMINI_MODEL = clean(process.env.GEMINI_MODEL) || "gemini-2.0-flash";
+var OPENAI_MODEL = clean(process.env.OPENAI_MODEL) || "gpt-4o-mini";
 
 var SYSTEM = [
   'You are "Windy", the friendly AI assistant on the PlayerDNA Labs website — an AI athlete-intelligence platform for football (soccer).',
@@ -46,10 +53,18 @@ function sanitize(messages) {
     var c = String(m.content == null ? "" : m.content).slice(0, 2000);
     if (c) out.push({ role: m.role, content: c });
   }
-  // keep last 12, and ensure it starts with a user turn
-  out = out.slice(-12);
-  while (out.length && out[0].role !== "user") out.shift();
+  out = out.slice(-12);                                  // cap history length
+  while (out.length && out[0].role !== "user") out.shift(); // must start with a user turn
   return out;
+}
+function pickProvider() {
+  if (PROVIDER === "anthropic" && ANTHROPIC_KEY) return "anthropic";
+  if (PROVIDER === "gemini" && GEMINI_KEY) return "gemini";
+  if (PROVIDER === "openai" && OPENAI_KEY) return "openai";
+  if (ANTHROPIC_KEY) return "anthropic";
+  if (GEMINI_KEY) return "gemini";
+  if (OPENAI_KEY) return "openai";
+  return null;
 }
 
 module.exports = async function (req, res) {
@@ -58,29 +73,50 @@ module.exports = async function (req, res) {
   if (!body || typeof body !== "object") { try { body = JSON.parse(await streamToString(req)); } catch (_) { body = {}; } }
   var messages = sanitize(body.messages);
   if (!messages.length) return res.status(400).json({ error: "No message." });
-  if (!ANTHROPIC_KEY && !OPENAI_KEY) return res.status(200).json({ needsSetup: true });
+
+  var provider = pickProvider();
+  if (!provider) return res.status(200).json({ needsSetup: true });
 
   try {
-    if (ANTHROPIC_KEY) {
+    if (provider === "anthropic") {
       var r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-        body: JSON.stringify({ model: "claude-3-5-haiku-latest", max_tokens: 400, system: SYSTEM, messages: messages })
+        body: JSON.stringify({ model: ANTHROPIC_MODEL, max_tokens: 400, system: SYSTEM, messages: messages })
       });
       var data = await r.json().catch(function () { return {}; });
-      if (r.ok && data.content && data.content[0] && data.content[0].text) return res.status(200).json({ reply: data.content[0].text });
+      if (r.ok && data.content && data.content[0] && data.content[0].text) return res.status(200).json({ reply: data.content[0].text, via: "anthropic" });
       return res.status(502).json({ error: (data.error && data.error.message) || "AI service error." });
-    } else {
-      var msgs = [{ role: "system", content: SYSTEM }].concat(messages);
-      var r2 = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: "Bearer " + OPENAI_KEY, "content-type": "application/json" },
-        body: JSON.stringify({ model: "gpt-4o-mini", max_tokens: 400, messages: msgs })
-      });
-      var d2 = await r2.json().catch(function () { return {}; });
-      if (r2.ok && d2.choices && d2.choices[0] && d2.choices[0].message) return res.status(200).json({ reply: d2.choices[0].message.content });
-      return res.status(502).json({ error: (d2.error && d2.error.message) || "AI service error." });
     }
+
+    if (provider === "gemini") {
+      var contents = messages.map(function (m) { return { role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }; });
+      var gr = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-goog-api-key": GEMINI_KEY },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM }] },
+          contents: contents,
+          generationConfig: { maxOutputTokens: 400, temperature: 0.7 }
+        })
+      });
+      var gd = await gr.json().catch(function () { return {}; });
+      var cand = gd.candidates && gd.candidates[0];
+      var gtext = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
+      if (gr.ok && gtext) return res.status(200).json({ reply: gtext, via: "gemini" });
+      return res.status(502).json({ error: (gd.error && gd.error.message) || "AI service error." });
+    }
+
+    // openai
+    var msgs = [{ role: "system", content: SYSTEM }].concat(messages);
+    var r2 = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + OPENAI_KEY, "content-type": "application/json" },
+      body: JSON.stringify({ model: OPENAI_MODEL, max_tokens: 400, messages: msgs })
+    });
+    var d2 = await r2.json().catch(function () { return {}; });
+    if (r2.ok && d2.choices && d2.choices[0] && d2.choices[0].message) return res.status(200).json({ reply: d2.choices[0].message.content, via: "openai" });
+    return res.status(502).json({ error: (d2.error && d2.error.message) || "AI service error." });
   } catch (e) {
     return res.status(500).json({ error: "Server error contacting the AI service." });
   }
