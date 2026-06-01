@@ -1,0 +1,29 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies (if tooling is added later)
+node_modules/
+
+# Environment / secrets (for when a backend is wired in)
+.env
+.env.*
+!.env.example
+
+# Build output (if a bundler is added later)
+dist/
+build/
+
+.vercel
+.claude

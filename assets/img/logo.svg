@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="PlayerDNA">
+  <defs>
+    <linearGradient id="pdna" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8fe1ff"/>
+      <stop offset="0.5" stop-color="#33b4ff"/>
+      <stop offset="1" stop-color="#2563ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#pdna)" opacity="0.12"/>
+  <g fill="none" stroke="url(#pdna)" stroke-width="3" stroke-linecap="round">
+    <path d="M16 7 C 33 14, 33 20, 24 24 C 15 28, 15 34, 32 41"/>
+    <path d="M32 7 C 15 14, 15 20, 24 24 C 33 28, 33 34, 16 41"/>
+  </g>
+  <g stroke="url(#pdna)" stroke-width="2.2" stroke-linecap="round" opacity="0.85">
+    <line x1="20" y1="12.5" x2="28" y2="12.5"/>
+    <line x1="19" y1="18" x2="29" y2="18"/>
+    <line x1="19" y1="30" x2="29" y2="30"/>
+    <line x1="20" y1="35.5" x2="28" y2="35.5"/>
+  </g>
+  <circle cx="24" cy="24" r="2.6" fill="url(#pdna)"/>
+</svg>
