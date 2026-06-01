@@ -15,7 +15,7 @@
   var input = document.getElementById("cbotInput");
 
   var KB = [
-    { k: ["hello", "hi ", "hey", "good morning", "good evening", "salam"], a: "Hey! 👋 Ask me about how PlayerDNA works, the tests, pricing, or how to get certified." },
+    { always: true, k: ["hello", "hi ", "hey", "good morning", "good evening", "salam"], a: "Hey! 👋 Ask me about how PlayerDNA works, the tests, pricing, or how to get certified." },
     { k: ["what is", "what's", "about", "who are you", "what do you do", "the system", "explain", "tell me about"], a: "PlayerDNA turns a single training or match video into a complete athlete profile — speed, power, stamina, biomechanics and injury risk — then recommends the football positions a player is built for. Camera AI estimates it; hardware confirms it." },
     { k: ["how does", "how it work", "how do you", "how do i use", "process", "pipeline", "steps", "work"], a: "Four steps: <b>1)</b> Capture a video, live session or self-assessment · <b>2)</b> AI tracks movement &amp; body pose · <b>3)</b> It scores 16 dimensions (speed, power, stamina, agility…) · <b>4)</b> You get a best-position fit and a personalized plan." },
     { k: ["price", "pricing", "cost", "how much", "fee", "pay", "subscription", "$", "dollar"], a: "Camera AI Starter is <b>$200 per user / year</b>. Hybrid Performance is custom per squad, and Elite Ground-Truth is enterprise. Want me to open the demo form? <a href='#' data-open-demo>Book a demo →</a>" },
@@ -29,7 +29,7 @@
     { k: ["youth", "kid", "child", "young", "age", "u15", "u12", "u9", "junior"], a: "Yes — for players aged 6–16 a dedicated youth mode focuses on healthy development and a long-term pathway, with a parent-friendly summary." },
     { k: ["data", "privacy", "gdpr", "secure", "store", "gdpr"], a: "Athlete data is stored securely and used only to produce that player's profile. Youth profiles need guardian consent, and you control who can access each athlete." },
     { k: ["who is it for", "who for", "parent", "scout", "coach", "club", "school"], a: "Everyone in the game — parents &amp; young players, academies &amp; clubs, and elite teams. One platform that meets each where they are." },
-    { k: ["thank", "thanks", "cheers", "appreciate", "great", "awesome", "perfect"], a: "You're welcome! ⚽ Anything else about the system, the tests or getting certified?" }
+    { always: true, k: ["thank", "thanks", "cheers", "appreciate", "great", "awesome", "perfect"], a: "You're welcome! ⚽ Anything else about the system, the tests or getting certified?" }
   ];
   var FALLBACK = "That's a little outside my scope 🙂 — I'm <b>Windy</b>, the PlayerDNA assistant, so I can only help with PlayerDNA: the system, the tests, pricing, positions, and getting certified. Try one of those, or <a href='#' data-open-demo>book a demo</a> to talk to the team.";
   var QUICK = ["How does it work?", "Pricing?", "How do I get certified?", "What tests?", "Do I need hardware?"];
@@ -113,13 +113,16 @@
       quick.appendChild(b);
     });
   }
+  // Domain terms — a message with none of these (and not a greeting/thanks) is off-topic.
+  var RELEVANT = /(playerdna|player dna|athlete|football|soccer|\bsport|position|scout|camera|pose|movement|\bspeed|jump|agility|stamina|biomechan|injur|\btest|assess|certif|enroll|\btrain|academy|price|pricing|\bcost|how much|hardware|demo|youth|profile|report|module|engine|vo2|lactate|force plate|\bfit\b|metric|windy|platform|\btier|\bplan\b|sign ?up|get started|\bkid|child|coach|\bclub|parent|\bdata\b|privacy|how does|how it work|how do i|what do you|recommend|protocol|video|sensor|gps)/;
   function answer(msg) {
     var m = " " + msg.toLowerCase() + " ", best = null, bestScore = 0;
     KB.forEach(function (it) {
       var s = 0; for (var i = 0; i < it.k.length; i++) { if (m.indexOf(it.k[i]) >= 0) s++; }
       if (s > bestScore) { bestScore = s; best = it; }
     });
-    return bestScore > 0 && best ? best.a : FALLBACK;
+    if (best && bestScore > 0 && (best.always || RELEVANT.test(m))) return best.a;
+    return FALLBACK;
   }
   function sendUser(text) {
     addMsg("user", escapeHtml(text));
