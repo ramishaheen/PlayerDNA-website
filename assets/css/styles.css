@@ -1966,6 +1966,13 @@ img[data-photo].failed { opacity: 1; }
 .subhero-vision .vision-label { display: inline-block; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--cyan); margin-bottom: 6px; }
 .subhero-vision p { font-size: 1.04rem; line-height: 1.6; color: var(--text); margin: 0; }
 .subhero-vision b { color: #fff; font-weight: 600; }
+.subhero-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
+@media (min-width: 940px) { .subhero-grid { grid-template-columns: 1.12fr 0.88fr; align-items: center; gap: 36px; } }
+.subhero-copy { min-width: 0; }
+.subhero-media { position: relative; width: 100%; max-width: 440px; margin-inline: auto; aspect-ratio: 754 / 648; }
+@media (min-width: 940px) { .subhero-media { max-width: none; margin: 0; } }
+.pose-glow { position: absolute; inset: 4% 6%; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 46%, rgba(46, 160, 255, 0.30), transparent 66%); filter: blur(26px); }
+.pose-vid { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; filter: grayscale(100%) brightness(1.12) sepia(100%) hue-rotate(162deg) saturate(720%) contrast(1.05); -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 58%, transparent 100%); mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 58%, transparent 100%); }
 
 .cert-levels { display: grid; gap: 22px; grid-template-columns: 1fr; }
 @media (min-width: 880px) { .cert-levels { grid-template-columns: repeat(3, 1fr); align-items: start; } }
