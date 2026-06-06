@@ -560,7 +560,7 @@ html[lang="ja"] h1, html[lang="ja"] h2, html[lang="ja"] h3, html[lang="ja"] h4, 
 .marquee-track { display: flex; gap: 60px; width: max-content; animation: marquee 30s linear infinite; }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 .marquee-item { display: flex; align-items: center; gap: 10px; color: var(--muted); font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; letter-spacing: -0.01em; white-space: nowrap; }
-.marquee-item svg { width: 22px; height: 22px; opacity: 0.8; }
+.marquee-item svg { width: 22px; height: 22px; color: var(--cyan); opacity: 1; }
 
 /* ---------- Cards ---------- */
 .card {
