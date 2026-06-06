@@ -2005,6 +2005,29 @@ img[data-photo].failed { opacity: 1; }
 .cert-success-modal .sub { color: var(--text-soft); margin-bottom: 22px; }
 @keyframes certPop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 
+/* ===================== Prerequisite: IAIDL Basic ===================== */
+.prereq-banner { display: flex; align-items: center; gap: 14px; margin-top: 28px; padding: 16px 20px; border-radius: var(--radius-lg, 22px); border: 1px solid color-mix(in srgb, var(--cyan) 32%, var(--line)); background: linear-gradient(120deg, color-mix(in srgb, var(--cyan) 9%, var(--surface)), var(--surface)); }
+.prereq-banner > svg { width: 30px; height: 30px; color: var(--cyan); flex: none; }
+.prereq-banner p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.5; margin: 0; }
+.prereq-banner b { color: var(--text); }
+.prereq-banner a { color: var(--cyan); font-weight: 600; white-space: nowrap; }
+.prereq-card { display: grid; gap: 24px; grid-template-columns: 1fr; max-width: 1000px; margin: 8px auto 0; }
+@media (min-width: 900px) { .prereq-card { grid-template-columns: 1.35fr 0.65fr; align-items: stretch; gap: 32px; } }
+.prereq-main { padding: clamp(24px, 3vw, 34px); border-radius: var(--radius-lg, 22px); border: 1px solid var(--line); background: var(--surface); }
+.prereq-title { font-size: 1.16rem; margin-bottom: 18px; }
+.prereq-list { display: grid; gap: 14px; }
+.prereq-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.95rem; color: var(--text-soft); line-height: 1.5; }
+.prereq-list li b { color: var(--text); }
+.prereq-list li svg { width: 20px; height: 20px; color: var(--cyan); flex: none; margin-top: 1px; }
+.prereq-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.prereq-seal-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px 24px; border-radius: var(--radius-lg, 22px); border: 1px solid color-mix(in srgb, var(--cyan) 42%, var(--line)); background: var(--surface-2); box-shadow: var(--glow-cyan, 0 0 40px rgba(46, 160, 255, 0.12)); }
+.prereq-seal { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; color: var(--cyan); background: rgba(46, 160, 255, 0.1); border: 1px solid color-mix(in srgb, var(--cyan) 40%, var(--line)); margin-bottom: 16px; }
+.prereq-seal svg { width: 34px; height: 34px; }
+.prereq-stamp { font-family: var(--font-display); font-size: 1.18rem; line-height: 1.3; letter-spacing: 0.01em; color: #fff; text-transform: uppercase; margin-bottom: 12px; }
+.prereq-seal-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.45; margin-bottom: 14px; }
+.prereq-seal-link { font-family: var(--font-mono); font-size: 0.76rem; color: var(--cyan); word-break: break-word; }
+.prereq-note { max-width: 880px; margin: 22px auto 0; font-size: 0.8rem; color: var(--muted); text-align: center; line-height: 1.5; }
+
 /* ===================== AI Assistant chatbot ===================== */
 .cbot-launch { position: fixed; right: 22px; bottom: 22px; z-index: 2500; width: 62px; height: 62px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--cyan) 45%, var(--line)); background: radial-gradient(circle at 50% 32%, #102843, #0a1019); color: var(--cyan); display: grid; place-items: center; cursor: pointer; box-shadow: 0 12px 30px -8px rgba(0,0,0,0.7), 0 0 22px rgba(46,160,255,0.22); transition: transform 0.3s var(--ease), box-shadow 0.3s, opacity 0.3s; }
 .cbot-launch:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 16px 38px -8px rgba(0,0,0,0.8), 0 0 34px rgba(46,160,255,0.42); }
