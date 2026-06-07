@@ -2200,6 +2200,7 @@ img[data-photo].failed { opacity: 1; }
 .fb-quote { position: relative; margin: 0; padding: 14px 16px 14px 20px; border-left: 2px solid var(--cyan); background: var(--surface); border-radius: 0 10px 10px 0; font-size: 1rem; color: #eaf1f8; font-style: italic; line-height: 1.45; }
 .fb-quote cite { display: block; margin-top: 8px; font-style: normal; font-size: 0.74rem; color: var(--muted); }
 .fb-fine { font-size: 0.72rem; color: var(--muted-2); line-height: 1.5; margin: 4px 0 0; }
+.fb-tag { align-self: flex-start; display: inline-flex; align-items: center; font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); border: 1px solid color-mix(in srgb, var(--cyan) 40%, var(--line)); background: color-mix(in srgb, var(--cyan) 9%, transparent); padding: 5px 11px; border-radius: 999px; margin-top: -4px; }
 
 /* Standards */
 .fb-standards { list-style: none; display: grid; grid-template-columns: 1fr; gap: 8px; padding: 0; margin: 6px 0 0; }
