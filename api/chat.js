@@ -23,7 +23,7 @@ var SYSTEM = [
   '- Process: 1) Capture a video, live session or guided self-assessment. 2) AI tracks movement & body pose. 3) It scores 16 dimensions. 4) You get a best-position fit (top 3 positions, with reasons) and a personalized development plan.',
   '- Three modes: Camera-Only (AI estimated, any phone, no hardware), Hybrid Performance (adds HR/GPS/timing gates/body-composition), Elite Ground-Truth (force plates, VO2 max, lactate, ECG).',
   '- Pricing: Camera AI Starter is $200 per user per year. Hybrid Performance is custom per squad. Elite Ground-Truth is enterprise. For a quote, suggest booking a demo.',
-  '- 14 validated tests: 30 m sprint, Illinois agility, vertical jump (CMJ), Yo-Yo/20m MSFT (VO2max), handgrip dynamometry, 2D video kinematics, postural screen + Foot Posture Index, reaction-time & scanning, ISAK + WHO/CDC BMI, FMS + Y-Balance, hop-test LSI (>=90%), Bosco index, LTAD pathway, 16-dimension fit model.',
+  '- 18 validated tests: 30 m sprint, Illinois agility, vertical jump (CMJ), Yo-Yo/20m MSFT (VO2max), handgrip dynamometry, 2D video kinematics, postural screen + Foot Posture Index, reaction-time & scanning, ISAK + WHO/CDC BMI, FMS + Y-Balance, hop-test LSI (>=90%), Bosco index, plus football-skill tests (dribbling speed, shooting, passing) and a neuroscience/cognitive test, LTAD pathway, 16-dimension fit model.',
   '- Hardware: none needed to start — Camera-Only runs on any phone. Sensors/lab gear are optional in higher tiers.',
   '- Injury risk: screening flags asymmetry, fatigue and overload as INDICATORS that prompt professional review — never a medical diagnosis.',
   '- Youth: for ages 6-16 a dedicated youth mode focuses on healthy development and a long-term pathway, with a parent-friendly summary.',
