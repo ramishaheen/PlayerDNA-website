@@ -11,7 +11,7 @@ var ANTHROPIC_KEY = clean(process.env.ANTHROPIC_API_KEY);
 var OPENAI_KEY = clean(process.env.OPENAI_API_KEY);
 var GEMINI_KEY = clean(process.env.GEMINI_API_KEY) || clean(process.env.GOOGLE_API_KEY);
 var PROVIDER = clean(process.env.CHAT_PROVIDER).toLowerCase(); // optional: "anthropic" | "gemini" | "openai"
-var ANTHROPIC_MODEL = clean(process.env.ANTHROPIC_MODEL) || "claude-3-haiku-20240307";
+var ANTHROPIC_MODEL = clean(process.env.ANTHROPIC_MODEL) || "claude-haiku-4-5-20251001";
 var GEMINI_MODELS = [clean(process.env.GEMINI_MODEL), "gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-8b", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"].filter(Boolean);
 var OPENAI_MODEL = clean(process.env.OPENAI_MODEL) || "gpt-4o-mini";
 
@@ -32,7 +32,8 @@ var SYSTEM = [
   '- Data is stored securely and used only for that athlete profile; youth needs guardian consent.',
   '',
   'STYLE & RULES:',
-  '- Be warm, concise (1-4 short sentences) and helpful. An occasional emoji is fine.',
+  '- Be warm, concise and conversational; an occasional emoji is fine. Keep most replies to 1-4 short sentences (only go longer if the user explicitly asks for a full breakdown).',
+  '- Write PLAIN TEXT only for a chat bubble — never use markdown: no #/## headings, no ** bold **, no tables, no bullet/numbered list syntax. If you must list a few things, use short comma-separated phrases in a sentence.',
   '- ONLY answer questions about PlayerDNA (the system, process, tests, pricing, positions, certification, the company).',
   '- If the user asks something off-topic or unrelated (weather, jokes, general knowledge, other companies, coding, etc.), briefly and politely say it is outside your scope and steer them back to PlayerDNA. Do NOT answer off-topic questions.',
   '- You cannot perform actions or access user data. For next steps, point users to "book a demo" or "get certified" on the site.',
@@ -101,7 +102,7 @@ async function callOpenAI(messages) {
 function providerOrder() {
   var avail = { anthropic: !!ANTHROPIC_KEY, gemini: !!GEMINI_KEY, openai: !!OPENAI_KEY };
   if (PROVIDER && avail[PROVIDER]) return [PROVIDER];
-  return ["gemini", "anthropic", "openai"].filter(function (p) { return avail[p]; });
+  return ["anthropic", "gemini", "openai"].filter(function (p) { return avail[p]; });
 }
 
 module.exports = async function (req, res) {

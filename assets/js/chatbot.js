@@ -127,7 +127,13 @@
   // Plain-text version of an HTML reply, for the model's conversation history.
   function htmlToText(s) { return String(s).replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim(); }
   // The LLM returns plain text; escape it and keep line breaks.
-  function formatReply(s) { return escapeHtml(s).replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>"); }
+  function formatReply(s) {
+    var h = escapeHtml(s);
+    h = h.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>"); // **bold** -> <b>
+    h = h.replace(/^\s*#{1,6}\s+/gm, "");           // strip markdown headings
+    h = h.replace(/^\s*[-*]\s+/gm, "• ");           // list markers -> bullet
+    return h.replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
+  }
 
   var history = [];           // {role:"user"|"assistant", content} sent to /api/chat
   var llmDown = false;        // once the endpoint reports "needs setup", stop calling it this session
