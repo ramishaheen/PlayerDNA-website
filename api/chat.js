@@ -11,8 +11,8 @@ var ANTHROPIC_KEY = clean(process.env.ANTHROPIC_API_KEY);
 var OPENAI_KEY = clean(process.env.OPENAI_API_KEY);
 var GEMINI_KEY = clean(process.env.GEMINI_API_KEY) || clean(process.env.GOOGLE_API_KEY);
 var PROVIDER = clean(process.env.CHAT_PROVIDER).toLowerCase(); // optional: "anthropic" | "gemini" | "openai"
-var ANTHROPIC_MODEL = clean(process.env.ANTHROPIC_MODEL) || "claude-3-5-haiku-latest";
-var GEMINI_MODEL = clean(process.env.GEMINI_MODEL) || "gemini-2.0-flash";
+var ANTHROPIC_MODEL = clean(process.env.ANTHROPIC_MODEL) || "claude-3-haiku-20240307";
+var GEMINI_MODELS = [clean(process.env.GEMINI_MODEL), "gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-8b", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"].filter(Boolean);
 var OPENAI_MODEL = clean(process.env.OPENAI_MODEL) || "gpt-4o-mini";
 
 var SYSTEM = [
@@ -28,7 +28,7 @@ var SYSTEM = [
   '- Injury risk: screening flags asymmetry, fatigue and overload as INDICATORS that prompt professional review — never a medical diagnosis.',
   '- Youth: for ages 6-16 a dedicated youth mode focuses on healthy development and a long-term pathway, with a parent-friendly summary.',
   '- Who it is for: parents & young players, academies & clubs, and elite teams.',
-  '- Certification / enrollment: 3 levels — Certified Analyst (Foundation), Performance Specialist (Advanced), PlayerDNA Partner (Expert). Certified people join a talent network and can earn from their first engagement. They apply on the certification page.',
+  '- Certification / enrollment: every level first requires IAIDL Basic — the accredited International AI Driving License foundation (a prerequisite for all levels). The 3 levels are AI Football Analyst (Foundation), Senior AI Performance Analyst (Advanced) and AI Scouting Coach (Expert). Certified people join a talent network and can earn from their first engagement; they apply on the certification page.',
   '- Data is stored securely and used only for that athlete profile; youth needs guardian consent.',
   '',
   'STYLE & RULES:',
@@ -57,14 +57,51 @@ function sanitize(messages) {
   while (out.length && out[0].role !== "user") out.shift(); // must start with a user turn
   return out;
 }
-function pickProvider() {
-  if (PROVIDER === "anthropic" && ANTHROPIC_KEY) return "anthropic";
-  if (PROVIDER === "gemini" && GEMINI_KEY) return "gemini";
-  if (PROVIDER === "openai" && OPENAI_KEY) return "openai";
-  if (ANTHROPIC_KEY) return "anthropic";
-  if (GEMINI_KEY) return "gemini";
-  if (OPENAI_KEY) return "openai";
-  return null;
+async function callAnthropic(messages) {
+  var r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: ANTHROPIC_MODEL, max_tokens: 400, system: SYSTEM, messages: messages })
+  });
+  var data = await r.json().catch(function () { return {}; });
+  if (r.ok && data.content && data.content[0] && data.content[0].text) return data.content[0].text;
+  throw new Error("anthropic: " + ((data.error && data.error.message) || ("HTTP " + r.status)));
+}
+async function callGemini(messages) {
+  var contents = messages.map(function (m) { return { role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }; });
+  var body = JSON.stringify({ system_instruction: { parts: [{ text: SYSTEM }] }, contents: contents, generationConfig: { maxOutputTokens: 400, temperature: 0.7 } });
+  var lastErr = "";
+  for (var k = 0; k < GEMINI_MODELS.length; k++) {
+    var gr = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODELS[k] + ":generateContent", {
+      method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": GEMINI_KEY }, body: body
+    });
+    var gd = await gr.json().catch(function () { return {}; });
+    var cand = gd.candidates && gd.candidates[0];
+    var gtext = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
+    if (gr.ok && gtext) return gtext;
+    lastErr = (gd.error && gd.error.message) || ("HTTP " + gr.status);
+    if (gr.status === 400 || gr.status === 403) break; // bad key / request — other models won't help
+  }
+  throw new Error("gemini: " + lastErr);
+}
+async function callOpenAI(messages) {
+  var msgs = [{ role: "system", content: SYSTEM }].concat(messages);
+  var r2 = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + OPENAI_KEY, "content-type": "application/json" },
+    body: JSON.stringify({ model: OPENAI_MODEL, max_tokens: 400, messages: msgs })
+  });
+  var d2 = await r2.json().catch(function () { return {}; });
+  if (r2.ok && d2.choices && d2.choices[0] && d2.choices[0].message) return d2.choices[0].message.content;
+  throw new Error("openai: " + ((d2.error && d2.error.message) || ("HTTP " + r2.status)));
+}
+
+// Default order: Gemini first (free + reliable), then Anthropic, then OpenAI.
+// CHAT_PROVIDER forces a single provider. Providers without a key are skipped.
+function providerOrder() {
+  var avail = { anthropic: !!ANTHROPIC_KEY, gemini: !!GEMINI_KEY, openai: !!OPENAI_KEY };
+  if (PROVIDER && avail[PROVIDER]) return [PROVIDER];
+  return ["gemini", "anthropic", "openai"].filter(function (p) { return avail[p]; });
 }
 
 module.exports = async function (req, res) {
@@ -74,50 +111,17 @@ module.exports = async function (req, res) {
   var messages = sanitize(body.messages);
   if (!messages.length) return res.status(400).json({ error: "No message." });
 
-  var provider = pickProvider();
-  if (!provider) return res.status(200).json({ needsSetup: true });
+  var order = providerOrder();
+  if (!order.length) return res.status(200).json({ needsSetup: true });
 
-  try {
-    if (provider === "anthropic") {
-      var r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-        body: JSON.stringify({ model: ANTHROPIC_MODEL, max_tokens: 400, system: SYSTEM, messages: messages })
-      });
-      var data = await r.json().catch(function () { return {}; });
-      if (r.ok && data.content && data.content[0] && data.content[0].text) return res.status(200).json({ reply: data.content[0].text, via: "anthropic" });
-      return res.status(502).json({ error: (data.error && data.error.message) || "AI service error." });
-    }
-
-    if (provider === "gemini") {
-      var contents = messages.map(function (m) { return { role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }; });
-      var gr = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": GEMINI_KEY },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM }] },
-          contents: contents,
-          generationConfig: { maxOutputTokens: 400, temperature: 0.7 }
-        })
-      });
-      var gd = await gr.json().catch(function () { return {}; });
-      var cand = gd.candidates && gd.candidates[0];
-      var gtext = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
-      if (gr.ok && gtext) return res.status(200).json({ reply: gtext, via: "gemini" });
-      return res.status(502).json({ error: (gd.error && gd.error.message) || "AI service error." });
-    }
-
-    // openai
-    var msgs = [{ role: "system", content: SYSTEM }].concat(messages);
-    var r2 = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + OPENAI_KEY, "content-type": "application/json" },
-      body: JSON.stringify({ model: OPENAI_MODEL, max_tokens: 400, messages: msgs })
-    });
-    var d2 = await r2.json().catch(function () { return {}; });
-    if (r2.ok && d2.choices && d2.choices[0] && d2.choices[0].message) return res.status(200).json({ reply: d2.choices[0].message.content, via: "openai" });
-    return res.status(502).json({ error: (d2.error && d2.error.message) || "AI service error." });
-  } catch (e) {
-    return res.status(500).json({ error: "Server error contacting the AI service." });
+  var callers = { anthropic: callAnthropic, gemini: callGemini, openai: callOpenAI };
+  var errs = [];
+  for (var i = 0; i < order.length; i++) {
+    try {
+      var reply = await callers[order[i]](messages);
+      if (reply) return res.status(200).json({ reply: reply, via: order[i] });
+    } catch (e) { errs.push(String((e && e.message) || e)); }
   }
+  if (errs.length) console.error("Windy AI providers failed:", errs.join(" | "));
+  return res.status(502).json({ error: "Windy is briefly unavailable — please try again." });
 };
