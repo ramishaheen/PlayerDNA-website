@@ -375,107 +375,6 @@
   /* ---------- Print / download report (Save as PDF) ---------- */
   $$("[data-print]").forEach((btn) => btn.addEventListener("click", () => window.print()));
 
-  /* ---------- Password visibility toggle ---------- */
-  $$(".toggle-pw").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const input = btn.parentElement.querySelector("input");
-      if (!input) return;
-      const show = input.type === "password";
-      input.type = show ? "text" : "password";
-      btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
-      btn.dataset.shown = String(show);
-    });
-  });
-
-  /* ---------- Auth form (front-end only; backend connects later) ---------- */
-  const authForm = $("#authForm");
-  if (authForm) {
-    const msg = $("#authMsg");
-    authForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = authForm.querySelector('input[type="email"]');
-      const pass = authForm.querySelector('input[type="password"]');
-      const validEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
-      const validPass = pass && pass.value.length >= 6;
-      if (!validEmail) return showMsg("err", "Please enter a valid email address.");
-      if (!validPass) return showMsg("err", "Password must be at least 6 characters.");
-      showMsg(
-        "ok",
-        "Credentials look good. Authentication backend is not connected yet — wire your API to this form to go live."
-      );
-      const btn = authForm.querySelector('button[type="submit"]');
-      if (btn) {
-        const original = btn.textContent;
-        btn.textContent = "Verifying…";
-        btn.disabled = true;
-        setTimeout(() => {
-          btn.textContent = original;
-          btn.disabled = false;
-        }, 1400);
-      }
-    });
-    function showMsg(type, text) {
-      if (!msg) return;
-      msg.className = "form-msg show " + type;
-      msg.textContent = text;
-    }
-  }
-
-  /* ---------- Auth tabs (Sign in / Create account) ---------- */
-  $$("[data-auth-tab]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      $$("[data-auth-tab]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      const mode = btn.dataset.authTab;
-      $$("[data-auth-only]").forEach((el) => {
-        el.style.display = el.dataset.authOnly === mode || el.dataset.authOnly === "both" ? "" : "none";
-      });
-      const title = $("#authTitle");
-      const sub = $("#authSub");
-      const submit = $("#authSubmit");
-      if (mode === "signup") {
-        if (title) title.textContent = "Create your account";
-        if (sub) sub.textContent = "Start screening athletes with PlayerDNA intelligence.";
-        if (submit) submit.textContent = "Create account";
-      } else {
-        if (title) title.textContent = "Welcome back";
-        if (sub) sub.textContent = "Sign in to your PlayerDNA Labs workspace.";
-        if (submit) submit.textContent = "Sign in";
-      }
-    });
-  });
-
-  /* ---------- Auth modal (single-page login / signup) ---------- */
-  const modal = $("#authModal");
-  if (modal) {
-    const openModal = (mode) => {
-      modal.classList.add("open");
-      document.body.classList.add("modal-open");
-      modal.setAttribute("aria-hidden", "false");
-      const tab = $(`[data-auth-tab="${mode === "signup" ? "signup" : "signin"}"]`, modal);
-      if (tab) tab.click();
-      const firstInput = modal.querySelector("input");
-      if (firstInput) setTimeout(() => firstInput.focus(), 80);
-    };
-    const closeModal = () => {
-      modal.classList.remove("open");
-      document.body.classList.remove("modal-open");
-      modal.setAttribute("aria-hidden", "true");
-    };
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-open-auth]");
-      if (btn) { e.preventDefault(); openModal(btn.dataset.openAuth); }
-    });
-    $$("[data-close-auth]", modal).forEach((el) => el.addEventListener("click", closeModal));
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal || e.target.classList.contains("modal-overlay")) closeModal();
-    });
-    window.addEventListener("keydown", (e) => e.key === "Escape" && modal.classList.contains("open") && closeModal());
-    // Open the modal automatically when arriving at #signup or #login
-    if (location.hash === "#signup") openModal("signup");
-    else if (location.hash === "#login") openModal("signin");
-  }
-
   /* ---------- Book-a-Demo modal (front-end only; backend connects later) ---------- */
   const demoModal = $("#demoModal");
   if (demoModal) {
@@ -710,8 +609,8 @@
         if (!activeVid.muted) activeVid.play().catch(() => {});
         return;
       }
-      // injected CTA buttons: close the book so the auth/demo modal (delegated on document) shows on top
-      if (e.target.closest("[data-open-auth], [data-open-demo]")) closeBook();
+      // injected CTA buttons: close the book so the demo modal (delegated on document) shows on top
+      if (e.target.closest("[data-open-demo]")) closeBook();
     });
     // Click the left / right half of the spread to turn pages (suppressed right after a drag)
     let suppressClick = false;

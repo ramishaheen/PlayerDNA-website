@@ -177,6 +177,6 @@
   });
   // Links inside bot replies that open the demo modal: close the chat so the modal shows on top
   messages.addEventListener("click", function (e) {
-    if (e.target.closest("[data-open-demo], [data-open-auth]")) closePanel();
+    if (e.target.closest("[data-open-demo]")) closePanel();
   });
 })();
