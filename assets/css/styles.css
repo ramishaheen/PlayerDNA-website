@@ -2005,6 +2005,22 @@ img[data-photo].failed { opacity: 1; }
 .lp-card h3 { font-size: 1.12rem; margin-bottom: 7px; }
 .lp-card p { font-size: 0.94rem; color: var(--text-soft); line-height: 1.55; }
 .lp-note { max-width: 760px; margin: 18px auto 0; font-size: 0.8rem; color: var(--muted); text-align: center; line-height: 1.55; }
+/* Insights / blog */
+.insights-list { display: grid; gap: 18px; max-width: 760px; margin: 0 auto; }
+.post-card { display: block; }
+.post-tag { display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+.post-card h3 { font-size: 1.2rem; margin-bottom: 8px; color: #fff; }
+.post-card p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.55; margin: 0; }
+.post-meta { display: block; margin-top: 12px; font-size: 0.78rem; color: var(--muted); font-family: var(--font-mono); }
+.article { max-width: 720px; margin: 0 auto; }
+.article-body { font-size: 1.04rem; line-height: 1.75; color: var(--text-soft); }
+.article-body h2 { font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 34px 0 12px; letter-spacing: -0.01em; }
+.article-body p { margin-bottom: 16px; }
+.article-body strong { color: #fff; }
+.article-body a { color: var(--cyan); font-weight: 600; }
+.article-body ul { margin: 0 0 16px; padding-left: 22px; }
+.article-body li { margin-bottom: 8px; }
+.article-meta { font-size: 0.82rem; color: var(--muted); font-family: var(--font-mono); margin-top: 14px; }
 
 /* ===================== Prerequisite: IAIDL Basic ===================== */
 .prereq-banner { display: flex; align-items: center; gap: 14px; margin-top: 28px; padding: 16px 20px; border-radius: var(--radius-lg, 22px); border: 1px solid color-mix(in srgb, var(--cyan) 32%, var(--line)); background: linear-gradient(120deg, color-mix(in srgb, var(--cyan) 9%, var(--surface)), var(--surface)); }
