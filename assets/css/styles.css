@@ -1992,6 +1992,20 @@ img[data-photo].failed { opacity: 1; }
 .cert-success-modal .sub { color: var(--text-soft); margin-bottom: 22px; }
 @keyframes certPop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 
+/* ===================== Landing pages (how-it-works, for-clubs, etc.) ===================== */
+.how-report { max-width: 640px; margin-inline: auto; }
+.how-report li { font-size: 0.98rem; }
+.cta-band { border-top: 1px solid var(--line); background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 6%, transparent), transparent 60%); }
+.lp-grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .lp-grid.cols-2 { grid-template-columns: 1fr 1fr; } .lp-grid.cols-3 { grid-template-columns: repeat(3, 1fr); } }
+.lp-card { padding: 26px 24px; border-radius: var(--radius-lg, 22px); border: 1px solid var(--line); background: var(--surface); transition: border-color 0.3s, transform 0.3s; }
+.lp-card:hover { border-color: color-mix(in srgb, var(--cyan) 45%, var(--line)); transform: translateY(-4px); }
+.lp-card .lp-ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(46,160,255,0.1); border: 1px solid color-mix(in srgb, var(--cyan) 34%, var(--line)); color: var(--cyan); margin-bottom: 14px; }
+.lp-card .lp-ic svg { width: 22px; height: 22px; }
+.lp-card h3 { font-size: 1.12rem; margin-bottom: 7px; }
+.lp-card p { font-size: 0.94rem; color: var(--text-soft); line-height: 1.55; }
+.lp-note { max-width: 760px; margin: 18px auto 0; font-size: 0.8rem; color: var(--muted); text-align: center; line-height: 1.55; }
+
 /* ===================== Prerequisite: IAIDL Basic ===================== */
 .prereq-banner { display: flex; align-items: center; gap: 14px; margin-top: 28px; padding: 16px 20px; border-radius: var(--radius-lg, 22px); border: 1px solid color-mix(in srgb, var(--cyan) 32%, var(--line)); background: linear-gradient(120deg, color-mix(in srgb, var(--cyan) 9%, var(--surface)), var(--surface)); }
 .prereq-banner > svg { width: 30px; height: 30px; color: var(--cyan); flex: none; }

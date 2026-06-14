@@ -5,13 +5,23 @@
   "redirects": [
     {
       "source": "/",
-      "has": [{ "type": "host", "value": "playerdna-labs.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "playerdna-labs.vercel.app"
+        }
+      ],
       "destination": "https://www.playerdna.tech/",
       "permanent": true
     },
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "playerdna-labs.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "playerdna-labs.vercel.app"
+        }
+      ],
       "destination": "https://www.playerdna.tech/:path*",
       "permanent": true
     },
@@ -23,6 +33,11 @@
     {
       "source": "/index",
       "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/certification",
+      "destination": "/certify.html",
       "permanent": true
     }
   ]
