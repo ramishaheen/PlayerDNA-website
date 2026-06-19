@@ -2022,6 +2022,15 @@ img[data-photo].failed { opacity: 1; }
 .article-body li { margin-bottom: 8px; }
 .article-meta { font-size: 0.82rem; color: var(--muted); font-family: var(--font-mono); margin-top: 14px; }
 
+/* ===================== Security & privacy compliance strip ===================== */
+.security-band { padding: clamp(34px, 6vw, 70px) 0 clamp(20px, 3vw, 42px); }
+.security-frame { position: relative; max-width: 940px; margin-inline: auto; border-radius: 24px; padding: 3px; overflow: hidden; box-shadow: 0 0 46px -10px rgba(46, 160, 255, 0.40), 0 24px 60px -26px rgba(0, 0, 0, 0.75); }
+.security-frame::before { content: ""; position: absolute; z-index: 0; top: 50%; left: 50%; width: 200%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); background: conic-gradient(from 0deg, #22d3ee, #2ea0ff, #7fe6ff, #f59e0b, #2ea0ff, #22d3ee); animation: secSpin 7s linear infinite; }
+.security-panel { position: relative; z-index: 1; border-radius: 21px; background: linear-gradient(180deg, #ffffff, #f2f4f7); padding: clamp(16px, 3.2vw, 30px) clamp(18px, 4vw, 46px); display: grid; place-items: center; }
+.security-badges { display: block; width: 100%; max-width: 880px; height: auto; }
+@keyframes secSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .security-frame::before { animation: none; } }
+
 /* ===================== Prerequisite: IAIDL Basic ===================== */
 .prereq-banner { display: flex; align-items: center; gap: 14px; margin-top: 28px; padding: 16px 20px; border-radius: var(--radius-lg, 22px); border: 1px solid color-mix(in srgb, var(--cyan) 32%, var(--line)); background: linear-gradient(120deg, color-mix(in srgb, var(--cyan) 9%, var(--surface)), var(--surface)); }
 .prereq-banner > svg { width: 30px; height: 30px; color: var(--cyan); flex: none; }
