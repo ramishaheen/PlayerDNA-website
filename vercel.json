@@ -39,6 +39,11 @@
       "source": "/certification",
       "destination": "/certify.html",
       "permanent": true
+    },
+    {
+      "source": "/franchise",
+      "destination": "/pricing#franchise",
+      "permanent": true
     }
   ]
 }
