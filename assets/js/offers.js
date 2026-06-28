@@ -10,21 +10,23 @@
 
   var modal = document.getElementById("offerBook");
   if (!modal) return;
-  var page = modal.querySelector(".ofb-page");
+  var book = modal.querySelector(".ofb-book");
+  var topImg = modal.querySelector(".ofb-top");
+  var underImg = modal.querySelector(".ofb-under");
   var titleEl = modal.querySelector(".ofb-title");
   var counter = modal.querySelector(".ofb-counter");
   var dl = modal.querySelector(".ofb-download");
   var prevBtn = modal.querySelector(".ofb-prev");
   var nextBtn = modal.querySelector(".ofb-next");
   var stage = modal.querySelector(".ofb-stage");
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var EASE = "cubic-bezier(.46,.03,.28,.99)";
+  var DUR = 580;
   var cur = { slug: null, page: 1, busy: false };
 
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   function path(slug, p) { return "/assets/img/offers/" + slug + "/p" + pad(p) + ".jpg"; }
-  function preload(slug, p) {
-    var o = OFFERS[slug];
-    if (p >= 1 && p <= o.pages) { var i = new Image(); i.src = path(slug, p); }
-  }
+  function preload(slug, p) { var o = OFFERS[slug]; if (p >= 1 && p <= o.pages) { var i = new Image(); i.src = path(slug, p); } }
 
   function render() {
     var o = OFFERS[cur.slug];
@@ -41,9 +43,11 @@
     cur.slug = slug; cur.page = 1; cur.busy = false;
     titleEl.textContent = o.title;
     dl.setAttribute("href", o.pdf);
-    page.style.transition = "none";
-    page.style.transform = "none";
-    page.src = path(slug, 1);
+    topImg.style.transition = "none";
+    topImg.style.transform = "rotateY(0deg)";
+    topImg.src = path(slug, 1);
+    underImg.src = path(slug, 1);
+    book.classList.remove("flipping");
     render();
     modal.classList.add("open");
     document.body.classList.add("modal-open");
@@ -55,32 +59,50 @@
     modal.setAttribute("aria-hidden", "true");
   }
 
-  // Page-turn: flip the page out around the spine edge, swap image, flip the new page in.
+  // Realistic page-turn: the top page rotates around the spine (left edge),
+  // revealing the page beneath. backface-visibility hides the blank back once
+  // it passes 90deg, so it reads as a real page lifting and turning over.
   function go(dir) {
     if (cur.busy || !cur.slug) return;
     var o = OFFERS[cur.slug];
     var np = cur.page + dir;
     if (np < 1 || np > o.pages) return;
+
+    if (REDUCED) {
+      cur.page = np; topImg.src = path(cur.slug, np); underImg.src = path(cur.slug, np); render(); return;
+    }
+
     cur.busy = true;
-    var out = dir > 0 ? -82 : 82;
-    page.style.transformOrigin = dir > 0 ? "left center" : "right center";
-    page.style.transition = "transform 0.21s ease-in, box-shadow 0.21s";
-    page.classList.add("turning");
-    page.style.transform = "perspective(2200px) rotateY(" + out + "deg)";
+    topImg.style.transition = "none";
+    if (dir > 0) {
+      underImg.src = path(cur.slug, np);          // next page sits beneath, revealed
+      topImg.src = path(cur.slug, cur.page);      // current page is the one turning away
+      topImg.style.transform = "rotateY(0deg)";
+      void topImg.offsetWidth;                    // reflow before animating
+      topImg.style.transition = "transform " + DUR + "ms " + EASE;
+      topImg.style.transform = "rotateY(-172deg)";
+    } else {
+      underImg.src = path(cur.slug, cur.page);    // current page stays beneath
+      topImg.src = path(cur.slug, np);            // previous page swings back in
+      topImg.style.transform = "rotateY(172deg)";
+      void topImg.offsetWidth;
+      topImg.style.transition = "transform " + DUR + "ms " + EASE;
+      topImg.style.transform = "rotateY(0deg)";
+    }
+    book.classList.add("flipping");
     setTimeout(function () {
       cur.page = np;
-      page.src = path(cur.slug, np);
-      page.style.transition = "none";
-      page.style.transform = "perspective(2200px) rotateY(" + (-out) + "deg)";
-      void page.offsetWidth; // reflow
-      page.style.transition = "transform 0.23s ease-out, box-shadow 0.23s";
-      page.style.transform = "perspective(2200px) rotateY(0deg)";
+      topImg.style.transition = "none";
+      topImg.src = path(cur.slug, np);
+      topImg.style.transform = "rotateY(0deg)";
+      underImg.src = path(cur.slug, np);
+      void topImg.offsetWidth;
+      book.classList.remove("flipping");
       render();
-      setTimeout(function () { page.classList.remove("turning"); cur.busy = false; }, 240);
-    }, 215);
+      cur.busy = false;
+    }, DUR);
   }
 
-  // Open booklets from any element with data-offer
   Array.prototype.forEach.call(document.querySelectorAll("[data-offer]"), function (c) {
     c.addEventListener("click", function (e) { e.preventDefault(); open(c.getAttribute("data-offer")); });
     c.addEventListener("keydown", function (e) {
@@ -97,11 +119,10 @@
     else if (e.key === "ArrowRight") go(1);
     else if (e.key === "ArrowLeft") go(-1);
   });
-  // tap left/right half of the page to turn; swipe on touch
   var sx = null;
   stage.addEventListener("click", function (e) {
     if (e.target.closest(".ofb-nav")) return;
-    var r = page.getBoundingClientRect();
+    var r = topImg.getBoundingClientRect();
     if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
     go(e.clientX > r.left + r.width / 2 ? 1 : -1);
   });
