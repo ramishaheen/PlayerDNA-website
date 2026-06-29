@@ -18,7 +18,6 @@
   var dl = modal.querySelector(".ofb-download");
   var prevBtn = modal.querySelector(".ofb-prev");
   var nextBtn = modal.querySelector(".ofb-next");
-  var stage = modal.querySelector(".ofb-stage");
   var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var cur = { slug: null, pages: 0, page: 0, perView: 2, animating: false, gen: 0 };
 
@@ -109,18 +108,62 @@
     else if (e.key === "ArrowRight") flip(1);
     else if (e.key === "ArrowLeft") flip(-1);
   });
-  // tap a side of the book to turn; swipe on touch
+  // tap a side of the book to turn (suppressed right after a drag)
+  var suppressClick = false;
   obook.addEventListener("click", function (e) {
+    if (suppressClick) { suppressClick = false; return; }
     var r = obook.getBoundingClientRect();
     flip(e.clientX > r.left + r.width / 2 ? 1 : -1);
   });
-  var sx = null;
-  stage.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
-  stage.addEventListener("touchend", function (e) {
-    if (sx === null) return;
-    var dx = e.changedTouches[0].clientX - sx; sx = null;
-    if (Math.abs(dx) > 40) flip(dx < 0 ? 1 : -1);
-  }, { passive: true });
+  // drag-to-turn: grab a page edge and pull it across (mouse + touch via pointer events)
+  var drag = null;
+  obook.addEventListener("pointerdown", function (e) {
+    if (cur.animating || !cur.slug) return;
+    var r = obook.getBoundingClientRect();
+    var x = e.clientX - r.left, edge = r.width * 0.45, dir = 0;
+    if (x > r.width - edge) dir = 1; else if (x < edge) dir = -1; else return;
+    if ((dir > 0 && cur.page + cur.perView >= cur.pages) || (dir < 0 && cur.page <= 0)) return;
+    drag = { dir: dir, startX: e.clientX, w: r.width * (cur.perView === 2 ? 0.5 : 1), progress: 0, started: false, pid: e.pointerId };
+  });
+  obook.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.startX;
+    if (!drag.started) {
+      if (Math.abs(dx) < 6) return;
+      drag.started = true;
+      setupLeaf(drag.dir);
+      leaf.style.transition = "none";
+      try { obook.setPointerCapture(drag.pid); } catch (_) {}
+    }
+    var p = (drag.dir > 0 ? -dx : dx) / drag.w;
+    p = Math.max(0, Math.min(1, p));
+    drag.progress = p;
+    leaf.style.transform = "rotateY(" + ((drag.dir > 0 ? -1 : 1) * 180 * p) + "deg)";
+  });
+  function endDrag() {
+    if (!drag) return;
+    var d = drag; drag = null;
+    if (!d.started) return;
+    suppressClick = true;
+    setTimeout(function () { suppressClick = false; }, 350);
+    var complete = d.progress > 0.35;
+    cur.animating = true;
+    leaf.style.transition = "transform 0.5s cubic-bezier(0.4,0.05,0.25,1)";
+    void leaf.offsetWidth;
+    leaf.style.transform = "rotateY(" + (complete ? (d.dir > 0 ? -1 : 1) * 180 : 0) + "deg)";
+    var myGen = ++cur.gen;
+    var finish = function () {
+      if (myGen !== cur.gen || !cur.animating) return; // idempotent: transitionend OR fallback timer, once
+      if (complete) cur.page += d.dir * cur.perView;
+      leaf.style.transition = ""; leaf.style.transform = ""; leaf.className = "obook-leaf";
+      renderStatic();
+      cur.animating = false;
+    };
+    leaf.addEventListener("transitionend", finish, { once: true });
+    setTimeout(finish, 700);
+  }
+  obook.addEventListener("pointerup", endDrag);
+  obook.addEventListener("pointercancel", endDrag);
   var rt;
   window.addEventListener("resize", function () {
     if (!modal.classList.contains("open")) return;
