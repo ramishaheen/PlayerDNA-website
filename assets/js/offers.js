@@ -1,4 +1,4 @@
-/* PlayerDNA offers — interactive flip-through booklets (page images rendered from the PDFs). */
+/* PlayerDNA offers — realistic interactive open-book viewer (PDF pages rendered to images). */
 (function () {
   "use strict";
   var OFFERS = {
@@ -10,9 +10,9 @@
 
   var modal = document.getElementById("offerBook");
   if (!modal) return;
-  var book = modal.querySelector(".ofb-book");
-  var topImg = modal.querySelector(".ofb-top");
-  var underImg = modal.querySelector(".ofb-under");
+  var obook = modal.querySelector(".ofb-obook");
+  var bkLeft = modal.querySelector("#ofbLeft"), bkRight = modal.querySelector("#ofbRight");
+  var leaf = modal.querySelector("#ofbLeaf"), leafFront = modal.querySelector("#ofbLeafFront"), leafBack = modal.querySelector("#ofbLeafBack");
   var titleEl = modal.querySelector(".ofb-title");
   var counter = modal.querySelector(".ofb-counter");
   var dl = modal.querySelector(".ofb-download");
@@ -20,38 +20,74 @@
   var nextBtn = modal.querySelector(".ofb-next");
   var stage = modal.querySelector(".ofb-stage");
   var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var EASE = "cubic-bezier(.46,.03,.28,.99)";
-  var DUR = 580;
-  var cur = { slug: null, page: 1, busy: false };
+  var cur = { slug: null, pages: 0, page: 0, perView: 2, animating: false, gen: 0 };
 
   function pad(n) { return (n < 10 ? "0" : "") + n; }
-  function path(slug, p) { return "/assets/img/offers/" + slug + "/p" + pad(p) + ".jpg"; }
-  function preload(slug, p) { var o = OFFERS[slug]; if (p >= 1 && p <= o.pages) { var i = new Image(); i.src = path(slug, p); } }
+  function path(slug, i1) { return "/assets/img/offers/" + slug + "/p" + pad(i1) + ".jpg"; }
+  function preload(slug, i0) { if (i0 >= 0 && i0 < cur.pages) { var im = new Image(); im.src = path(slug, i0 + 1); } }
+  // i0 = 0-based page index; returns "" (blank) when out of range
+  function html(i0) { return (i0 >= 0 && i0 < cur.pages) ? '<img src="' + path(cur.slug, i0 + 1) + '" alt="Page ' + (i0 + 1) + '" draggable="false" />' : ""; }
+  function paint(el, i0) { var h = html(i0); el.innerHTML = h; el.classList.toggle("is-blank", h === ""); }
 
-  function render() {
-    var o = OFFERS[cur.slug];
-    counter.textContent = cur.page + " / " + o.pages;
-    prevBtn.disabled = cur.page <= 1;
-    nextBtn.disabled = cur.page >= o.pages;
-    preload(cur.slug, cur.page + 1);
-    preload(cur.slug, cur.page - 1);
+  function isMobile() { return window.matchMedia("(max-width: 640px)").matches; }
+  function recompute() { cur.perView = isMobile() ? 1 : 2; if (cur.perView === 2) cur.page = Math.floor(cur.page / 2) * 2; }
+
+  function renderStatic() {
+    obook.classList.toggle("is-single", cur.perView === 1);
+    if (cur.perView === 2) { paint(bkLeft, cur.page); paint(bkRight, cur.page + 1); }
+    else { bkLeft.innerHTML = ""; bkLeft.classList.add("is-blank"); paint(bkRight, cur.page); }
+    var l = cur.page + 1, r = Math.min(cur.page + cur.perView, cur.pages);
+    counter.textContent = (cur.perView === 2 && r > l ? l + "–" + r : "" + l) + " / " + cur.pages;
+    prevBtn.disabled = cur.page <= 0;
+    nextBtn.disabled = cur.page + cur.perView >= cur.pages;
+    preload(cur.slug, cur.page + 2); preload(cur.slug, cur.page + 3);
+    preload(cur.slug, cur.page - 1); preload(cur.slug, cur.page - 2);
+  }
+
+  function setupLeaf(dir) {
+    if (cur.perView === 2) {
+      if (dir > 0) { paint(leafFront, cur.page + 1); paint(leafBack, cur.page + 2); paint(bkRight, cur.page + 3); leaf.className = "obook-leaf is-next"; }
+      else { paint(leafFront, cur.page); paint(leafBack, cur.page - 1); paint(bkLeft, cur.page - 2); leaf.className = "obook-leaf is-prev"; }
+    } else {
+      paint(leafFront, cur.page); paint(leafBack, dir > 0 ? cur.page + 1 : cur.page - 1); paint(bkRight, dir > 0 ? cur.page + 1 : cur.page - 1);
+      leaf.className = "obook-leaf is-single " + (dir > 0 ? "is-next" : "is-prev");
+    }
+  }
+
+  function flip(dir) {
+    if (cur.animating || !cur.slug) return;
+    if (dir > 0 && cur.page + cur.perView >= cur.pages) return;
+    if (dir < 0 && cur.page <= 0) return;
+    if (REDUCED) { cur.page += dir * cur.perView; renderStatic(); return; }
+    cur.animating = true;
+    setupLeaf(dir);
+    void leaf.offsetWidth;
+    leaf.classList.add("flipping");
+    var myGen = ++cur.gen;
+    var done = function () {
+      if (myGen !== cur.gen || !cur.animating) return;
+      cur.page += dir * cur.perView;
+      renderStatic();
+      leaf.className = "obook-leaf";
+      cur.animating = false;
+    };
+    leaf.addEventListener("transitionend", done, { once: true });
+    setTimeout(done, 1000); // fallback
   }
 
   function open(slug) {
     var o = OFFERS[slug];
     if (!o) return;
-    cur.slug = slug; cur.page = 1; cur.busy = false;
+    cur.slug = slug; cur.pages = o.pages; cur.page = 0; cur.animating = false; cur.gen++;
     titleEl.textContent = o.title;
     dl.setAttribute("href", o.pdf);
-    topImg.style.transition = "none";
-    topImg.style.transform = "rotateY(0deg)";
-    topImg.src = path(slug, 1);
-    underImg.src = path(slug, 1);
-    book.classList.remove("flipping");
-    render();
+    leaf.className = "obook-leaf";
+    recompute();
+    renderStatic();
     modal.classList.add("open");
     document.body.classList.add("modal-open");
     modal.setAttribute("aria-hidden", "false");
+    obook.classList.remove("ofb-opening"); void obook.offsetWidth; obook.classList.add("ofb-opening");
   }
   function close() {
     modal.classList.remove("open");
@@ -59,77 +95,36 @@
     modal.setAttribute("aria-hidden", "true");
   }
 
-  // Realistic page-turn: the top page rotates around the spine (left edge),
-  // revealing the page beneath. backface-visibility hides the blank back once
-  // it passes 90deg, so it reads as a real page lifting and turning over.
-  function go(dir) {
-    if (cur.busy || !cur.slug) return;
-    var o = OFFERS[cur.slug];
-    var np = cur.page + dir;
-    if (np < 1 || np > o.pages) return;
-
-    if (REDUCED) {
-      cur.page = np; topImg.src = path(cur.slug, np); underImg.src = path(cur.slug, np); render(); return;
-    }
-
-    cur.busy = true;
-    topImg.style.transition = "none";
-    if (dir > 0) {
-      underImg.src = path(cur.slug, np);          // next page sits beneath, revealed
-      topImg.src = path(cur.slug, cur.page);      // current page is the one turning away
-      topImg.style.transform = "rotateY(0deg)";
-      void topImg.offsetWidth;                    // reflow before animating
-      topImg.style.transition = "transform " + DUR + "ms " + EASE;
-      topImg.style.transform = "rotateY(-172deg)";
-    } else {
-      underImg.src = path(cur.slug, cur.page);    // current page stays beneath
-      topImg.src = path(cur.slug, np);            // previous page swings back in
-      topImg.style.transform = "rotateY(172deg)";
-      void topImg.offsetWidth;
-      topImg.style.transition = "transform " + DUR + "ms " + EASE;
-      topImg.style.transform = "rotateY(0deg)";
-    }
-    book.classList.add("flipping");
-    setTimeout(function () {
-      cur.page = np;
-      topImg.style.transition = "none";
-      topImg.src = path(cur.slug, np);
-      topImg.style.transform = "rotateY(0deg)";
-      underImg.src = path(cur.slug, np);
-      void topImg.offsetWidth;
-      book.classList.remove("flipping");
-      render();
-      cur.busy = false;
-    }, DUR);
-  }
-
   Array.prototype.forEach.call(document.querySelectorAll("[data-offer]"), function (c) {
     c.addEventListener("click", function (e) { e.preventDefault(); open(c.getAttribute("data-offer")); });
-    c.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(c.getAttribute("data-offer")); }
-    });
+    c.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(c.getAttribute("data-offer")); } });
   });
-  prevBtn.addEventListener("click", function () { go(-1); });
-  nextBtn.addEventListener("click", function () { go(1); });
+  prevBtn.addEventListener("click", function () { flip(-1); });
+  nextBtn.addEventListener("click", function () { flip(1); });
   Array.prototype.forEach.call(modal.querySelectorAll("[data-ofb-close]"), function (b) { b.addEventListener("click", close); });
   modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
   window.addEventListener("keydown", function (e) {
     if (!modal.classList.contains("open")) return;
     if (e.key === "Escape") close();
-    else if (e.key === "ArrowRight") go(1);
-    else if (e.key === "ArrowLeft") go(-1);
+    else if (e.key === "ArrowRight") flip(1);
+    else if (e.key === "ArrowLeft") flip(-1);
+  });
+  // tap a side of the book to turn; swipe on touch
+  obook.addEventListener("click", function (e) {
+    var r = obook.getBoundingClientRect();
+    flip(e.clientX > r.left + r.width / 2 ? 1 : -1);
   });
   var sx = null;
-  stage.addEventListener("click", function (e) {
-    if (e.target.closest(".ofb-nav")) return;
-    var r = topImg.getBoundingClientRect();
-    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
-    go(e.clientX > r.left + r.width / 2 ? 1 : -1);
-  });
   stage.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener("touchend", function (e) {
     if (sx === null) return;
     var dx = e.changedTouches[0].clientX - sx; sx = null;
-    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+    if (Math.abs(dx) > 40) flip(dx < 0 ? 1 : -1);
   }, { passive: true });
+  var rt;
+  window.addEventListener("resize", function () {
+    if (!modal.classList.contains("open")) return;
+    clearTimeout(rt);
+    rt = setTimeout(function () { var p = cur.perView; recompute(); if (cur.perView !== p) renderStatic(); }, 150);
+  });
 })();
